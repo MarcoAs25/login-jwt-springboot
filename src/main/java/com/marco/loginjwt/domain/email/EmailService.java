@@ -10,13 +10,17 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
 public class EmailService {
     private final JavaMailSender javaMailSender;
     private final ConfirmationCodeService confirmationCodeService;
-
+    private final TemplateEngine templateEngine;
     public void sendMail(String to, String subject, String body) {
 
         MimeMessage message = javaMailSender.createMimeMessage();
@@ -36,12 +40,18 @@ public class EmailService {
     @Async
     public void sendMailConfirmation(User user) {
         ConfirmationCode confirmationCode = confirmationCodeService.createConfirmationCode(user);
+        String code = confirmationCode.getCode();
+        String systemName = "login-jwt";
+        String title = String.format("Bem vindo ao sistema %s %s!", systemName, user.getName());
 
-        String body = "<html><body>";
-        body += "<p>Olá " + user.getName() + ",</p>";
-        body += "<p>Seu código de confirmação de conta é: <strong>" + confirmationCode.getCode() + "</strong></p>";
-        body += "<p>Caso não tenha criado uma conta em login-jwt, por favor, desconsidere esta mensagem.</p>";
-        body += "</body></html>";
+        Context context = new Context();
+        context.setVariable("title",title);
+        context.setVariable("code",code);
+        context.setVariable("systemName",systemName);
+
+        String body = templateEngine.process("email/confirmacao-conta", context);
+        context.clearVariables();
+        templateEngine.clearTemplateCache();
 
         sendMail(user.getEmail(), "Código de confirmação de conta", body);
     }
