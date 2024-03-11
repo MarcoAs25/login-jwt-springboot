@@ -25,8 +25,8 @@ public class User implements UserDetails {
     @Column
     private Long id;
 
-    @Column(unique = true)
-    private String username;
+    @Column
+    private String name;
 
     @Column(unique = true)
     private String email;
@@ -35,9 +35,17 @@ public class User implements UserDetails {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
+    @Column
+    private Boolean activated;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("DEFAULT"));
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
     }
 
     @Override
@@ -57,6 +65,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return activated;
     }
 }

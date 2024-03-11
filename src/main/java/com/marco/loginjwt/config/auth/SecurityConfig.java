@@ -29,6 +29,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/refresh-token").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/user").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/user/confirm-register").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(filterChain, UsernamePasswordAuthenticationFilter.class)

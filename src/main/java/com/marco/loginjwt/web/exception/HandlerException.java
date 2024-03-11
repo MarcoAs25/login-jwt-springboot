@@ -3,6 +3,7 @@ package com.marco.loginjwt.web.exception;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -15,6 +16,16 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class HandlerException {
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ErrorMessage> exceptionMessage(DisabledException e) {
+        e.printStackTrace();
+        ErrorMessage message = new ErrorMessage();
+        message.setMessages(List.of("disabled user."));
+        message.setTimestamp(new Date());
+        message.setStatus(HttpStatus.BAD_REQUEST.value());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+    }
 
     @ExceptionHandler(InternalAuthenticationServiceException.class)
     public ResponseEntity<ErrorMessage> exceptionMessage(InternalAuthenticationServiceException e) {

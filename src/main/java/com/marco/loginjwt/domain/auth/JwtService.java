@@ -8,12 +8,12 @@ import com.marco.loginjwt.domain.user.User;
 import com.marco.loginjwt.web.exception.ExceptionMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.ZoneId;
 
-@Component
+@Service
 public class JwtService {
     @Value("${api.security.token.secret}")
     private String secret;

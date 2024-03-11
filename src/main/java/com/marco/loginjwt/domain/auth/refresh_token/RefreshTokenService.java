@@ -16,13 +16,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
-    private final UserService userService;
 
     @Value("${api.security.token.refresh.expiration-seconds}")
     private Long tokenRefreshExpirationSeconds;
-    public RefreshToken createRefreshToken(String username) {
+    public RefreshToken createRefreshToken(String username, User user) {
         RefreshToken refreshToken = RefreshToken.builder()
-                .user((User) userService.loadUserByUsername(username))
+                .user(user)
                 .token(UUID.randomUUID().toString())
                 .expiryDate(Instant.now().plusSeconds(tokenRefreshExpirationSeconds)) // set expiry of refresh token to 10 minutes - you can configure it application.properties file
                 .build();
@@ -40,5 +39,4 @@ public class RefreshTokenService {
         }
         return token;
     }
-
 }

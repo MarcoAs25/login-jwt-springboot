@@ -24,12 +24,13 @@ public class AuthService {
 
     public Map<String, String> auth(AuthRequest request) {
         Map<String, String> result = new HashMap<>();
-        var usernamePassword = new UsernamePasswordAuthenticationToken(request.username(), request.password());
+        var usernamePassword = new UsernamePasswordAuthenticationToken(request.email(), request.password());
         var auth = authenticationManager.authenticate(usernamePassword);
+        User user = (User) auth.getPrincipal();
         if (auth.isAuthenticated()) {
-            var token = jwtService.generateToken((User) auth.getPrincipal());
+            var token = jwtService.generateToken(user);
             result.put("token", token);
-            RefreshToken refreshToken = refreshTokenService.createRefreshToken(request.username());
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(request.email(), user);
             result.put("refresh", refreshToken.getToken());
             return result;
         }
@@ -44,7 +45,7 @@ public class AuthService {
                     String refreshToken = jwtService.generateToken(user);
                     return refreshToken;
                 }).orElseThrow(() -> {
-                    throw new ExceptionMessage(HttpStatus.UNAUTHORIZED, "refresh Token not valid.");
+                    throw new ExceptionMessage(HttpStatus.UNAUTHORIZED, "refresh RefreshToken not valid.");
                 });
     }
 }

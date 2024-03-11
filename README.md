@@ -1,2 +1,2 @@
 # login-jwt-spring-boot
- sistema de login utilizando jwt com token refresh
+ sistema de login utilizando jwt com refreshToken refresh
