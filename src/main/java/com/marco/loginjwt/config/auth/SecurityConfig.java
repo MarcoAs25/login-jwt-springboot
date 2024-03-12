@@ -30,6 +30,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/refresh-token").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/user").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/user/confirm-register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/user/forgot-password/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/user/forgot-password/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(filterChain, UsernamePasswordAuthenticationFilter.class)

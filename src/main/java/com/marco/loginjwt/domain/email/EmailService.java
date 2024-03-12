@@ -1,5 +1,6 @@
 package com.marco.loginjwt.domain.email;
 
+import com.marco.loginjwt.domain.auth.confirmation_code.CodeType;
 import com.marco.loginjwt.domain.auth.confirmation_code.ConfirmationCode;
 import com.marco.loginjwt.domain.auth.confirmation_code.ConfirmationCodeService;
 import com.marco.loginjwt.domain.user.User;
@@ -12,8 +13,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-
-import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +38,7 @@ public class EmailService {
     }
     @Async
     public void sendMailConfirmation(User user) {
-        ConfirmationCode confirmationCode = confirmationCodeService.createConfirmationCode(user);
+        ConfirmationCode confirmationCode = confirmationCodeService.createConfirmationCode(user, CodeType.ACCOUNT_CONFIRMATION);
         String code = confirmationCode.getCode();
         String systemName = "login-jwt";
         String title = String.format("Bem vindo ao sistema %s %s!", systemName, user.getName());
@@ -49,10 +48,28 @@ public class EmailService {
         context.setVariable("code",code);
         context.setVariable("systemName",systemName);
 
-        String body = templateEngine.process("email/confirmacao-conta", context);
+        String body = templateEngine.process("email/confirm-account", context);
         context.clearVariables();
         templateEngine.clearTemplateCache();
 
         sendMail(user.getEmail(), "Código de confirmação de conta", body);
+    }
+    @Async
+    public void sendCodeResetPassword(User user) {
+        ConfirmationCode confirmationCode = confirmationCodeService.createConfirmationCode(user, CodeType.RESET_PASSWORD);
+        String code = confirmationCode.getCode();
+        String systemName = "login-jwt";
+        String title = String.format("Redefinição de senha!");
+
+        Context context = new Context();
+        context.setVariable("title",title);
+        context.setVariable("code",code);
+        context.setVariable("systemName",systemName);
+
+        String body = templateEngine.process("email/reset-password", context);
+        context.clearVariables();
+        templateEngine.clearTemplateCache();
+
+        sendMail(user.getEmail(), "Código para redefinição de senha", body);
     }
 }

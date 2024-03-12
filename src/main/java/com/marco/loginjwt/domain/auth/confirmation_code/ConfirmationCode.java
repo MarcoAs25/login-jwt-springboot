@@ -21,6 +21,11 @@ public class ConfirmationCode {
     @Column
     private String code;
     @Column
+    private String token;
+    @Enumerated(EnumType.STRING)
+    @Column
+    private CodeType codeType;
+    @Column
     private Instant expiryDate;
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")

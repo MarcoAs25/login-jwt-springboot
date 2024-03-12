@@ -3,6 +3,7 @@ package com.marco.loginjwt.web.exception;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,9 +20,17 @@ public class HandlerException {
 
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<ErrorMessage> exceptionMessage(DisabledException e) {
-        e.printStackTrace();
         ErrorMessage message = new ErrorMessage();
         message.setMessages(List.of("disabled user."));
+        message.setTimestamp(new Date());
+        message.setStatus(HttpStatus.BAD_REQUEST.value());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorMessage> exceptionMessage(BadCredentialsException e) {
+        ErrorMessage message = new ErrorMessage();
+        message.setMessages(List.of("Invalid email or password"));
         message.setTimestamp(new Date());
         message.setStatus(HttpStatus.BAD_REQUEST.value());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
@@ -38,7 +47,6 @@ public class HandlerException {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorMessage> exceptionMessage(Exception e) {
-        e.printStackTrace();
         ErrorMessage message = new ErrorMessage();
         message.setMessages(List.of("an unexpected error occurred while processing your request. please try again later."));
         message.setTimestamp(new Date());

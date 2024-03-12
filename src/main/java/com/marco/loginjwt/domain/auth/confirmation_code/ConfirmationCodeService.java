@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,13 +22,15 @@ public class ConfirmationCodeService {
 
     private final ConfirmationCodeRepository confirmationCodeRepository;
     @Transactional
-    public ConfirmationCode createConfirmationCode(User user) {
-        deleteByUser(user); //delete old confirmation codes
+    public ConfirmationCode createConfirmationCode(User user, CodeType codeType) {
+        deleteByUser(user, codeType);
         ConfirmationCode confirmationCode = new ConfirmationCode();
         confirmationCode = confirmationCode.builder()
                 .user(user)
                 .code(generateCode())
+                .token(codeType == CodeType.ACCOUNT_CONFIRMATION? null: UUID.randomUUID().toString())
                 .expiryDate(Instant.now().plusSeconds(codeConfirmationExpiration))
+                .codeType(codeType)
                 .build();
         return confirmationCodeRepository.save(confirmationCode);
     }
@@ -42,17 +45,23 @@ public class ConfirmationCodeService {
         return code;
     }
 
-    public Optional<ConfirmationCode> findByEmail(String email) {
-        return confirmationCodeRepository.findByUser_Email(email);
+    public Optional<ConfirmationCode> findByEmail(String email, CodeType codeType) {
+        return confirmationCodeRepository.findByUser_EmailAndCodeType(email, codeType);
     }
 
-    public void verify(UserConfirmationCodeRequest request) {
-        ConfirmationCode confirmationCode = confirmationCodeRepository.findByUser_EmailAndCode(request.email(), request.code());
+    public ConfirmationCode verify(UserConfirmationCodeRequest request, CodeType codeType, VerificationStrategy verificationStrategy) {
+        ConfirmationCode confirmationCode;
+        switch (verificationStrategy){
+            case CODE -> confirmationCode = confirmationCodeRepository.findByUser_EmailAndCodeAndCodeType(request.email(), request.code(), codeType);
+            case TOKEN -> confirmationCode = confirmationCodeRepository.findByUser_EmailAndTokenAndCodeType(request.email(), request.token(), codeType);
+            default -> throw new ExceptionMessage(HttpStatus.BAD_REQUEST, "verification strategy not found.");
+        }
         if(confirmationCode != null){
             verifyExpiration(confirmationCode);
         }else{
             throw new ExceptionMessage(HttpStatus.BAD_REQUEST, "code confirmation invalid.");
         }
+        return confirmationCode;
     }
 
     public ConfirmationCode verifyExpiration(ConfirmationCode token) {
@@ -62,8 +71,8 @@ public class ConfirmationCodeService {
         }
         return token;
     }
-    private void deleteByUser(User user){
-       Optional<ConfirmationCode> confirmationCode = confirmationCodeRepository.findByUser_Email(user.getEmail());
+    private void deleteByUser(User user, CodeType codeType){
+       Optional<ConfirmationCode> confirmationCode = findByEmail(user.getEmail(), codeType);
         confirmationCode.ifPresent(confirmationCodeRepository::delete);
     }
 }

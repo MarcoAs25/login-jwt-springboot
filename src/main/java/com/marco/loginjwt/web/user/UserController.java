@@ -1,9 +1,7 @@
 package com.marco.loginjwt.web.user;
 
 import com.marco.loginjwt.api.auth.AuthRequest;
-import com.marco.loginjwt.api.user.UserConfirmationCodeRequest;
-import com.marco.loginjwt.api.user.UserRequest;
-import com.marco.loginjwt.api.user.UserResponse;
+import com.marco.loginjwt.api.user.*;
 import com.marco.loginjwt.domain.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +23,21 @@ public class UserController {
     @PostMapping("/confirm-register")
     private ResponseEntity<UserResponse> confirmRegister(@Valid @RequestBody UserConfirmationCodeRequest code) {
         userService.confirmRegister(code);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/forgot-password")
+    private ResponseEntity<UserResponse> forgotPasswordRequest(@Valid @RequestBody ForgotPasswordRequest request) {
+        userService.forgotPasswordRequest(request);
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping("/forgot-password/{code}/{email}")
+    private ResponseEntity<UserPasswordTokenResponse> findTokenByEmailAndCode(@PathVariable("code") String code, @PathVariable("email") String email) {
+        return ResponseEntity.ok(userService.findTokenByEmailAndCode(email, code));
+    }
+    @PostMapping("/forgot-password/reset-password")
+    private ResponseEntity<UserPasswordTokenResponse> findTokenByEmailAndCode(@RequestHeader("Token-Password") String token, @Valid @RequestBody UserResetPasswordRequest request) {
+        userService.resetPassword(token, request);
         return ResponseEntity.ok().build();
     }
 }
