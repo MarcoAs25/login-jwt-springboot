@@ -45,7 +45,7 @@ public class AuthService {
                     String refreshToken = jwtService.generateToken(user);
                     return refreshToken;
                 }).orElseThrow(() -> {
-                    throw new ExceptionMessage(HttpStatus.UNAUTHORIZED, "refresh RefreshToken not valid.");
+                    throw new ExceptionMessage(HttpStatus.UNAUTHORIZED, "refresh token not valid.");
                 });
     }
 }
