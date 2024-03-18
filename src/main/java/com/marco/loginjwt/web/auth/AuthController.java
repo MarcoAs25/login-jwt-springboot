@@ -8,10 +8,7 @@ import com.marco.loginjwt.domain.auth.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -24,6 +21,7 @@ public class AuthController {
         AuthResponse response = AuthMapper.toAuthResponse(authService.auth(request));
         return ResponseEntity.ok(response);
     }
+    @CrossOrigin(origins = "http://localhost:4200")
 
     @PostMapping("/refresh-token")
     private ResponseEntity<RefreshTokenResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
