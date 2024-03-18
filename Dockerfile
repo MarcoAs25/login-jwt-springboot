@@ -1,4 +1,4 @@
-FROM maven:3.9.5 AS build
+FROM maven:3-openjdk-17 AS build
 
 RUN mvn install clean install
 
