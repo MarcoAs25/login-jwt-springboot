@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -19,18 +20,21 @@ import java.io.IOException;
 public class FilterChain extends OncePerRequestFilter {
     private final JwtService tokenService;
     private final UserService usersService;
-
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, jakarta.servlet.FilterChain filterChain) throws ServletException, IOException {
-        var token = this.recoverToken(request);
-        if (token != null) {
-            var userName = tokenService.validateToken(token);
-            UserDetails user = usersService.loadUserByUsername(userName);
-
-            var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,jakarta.servlet.FilterChain filterChain) throws ServletException, IOException {
+        try {
+            String token = recoverToken(request);
+            if (token != null) {
+                String username = tokenService.validateToken(token);
+                UserDetails userDetails = usersService.loadUserByUsername(username);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+            filterChain.doFilter(request, response);
+        } catch (AuthenticationException authEx) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
-        filterChain.doFilter(request, response);
     }
 
     private String recoverToken(HttpServletRequest request) {

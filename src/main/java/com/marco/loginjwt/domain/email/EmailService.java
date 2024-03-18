@@ -29,7 +29,7 @@ public class EmailService {
             helper.setText(htmlMsg, true);
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setFrom("noreply@gmail.com");
+            //helper.setFrom("noreply@gmail.com");
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }

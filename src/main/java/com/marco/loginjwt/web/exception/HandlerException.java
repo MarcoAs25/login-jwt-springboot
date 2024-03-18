@@ -59,8 +59,8 @@ public class HandlerException {
         ErrorMessage message = new ErrorMessage();
         message.setMessages(Collections.singletonList(e.getMessage()));
         message.setTimestamp(new Date());
-        message.setStatus(HttpStatus.BAD_REQUEST.value());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+        message.setStatus(e.getStatusCode().value());
+        return ResponseEntity.status(e.getStatusCode().value()).body(message);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

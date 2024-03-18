@@ -8,6 +8,7 @@ import com.marco.loginjwt.domain.user.User;
 import com.marco.loginjwt.web.exception.ExceptionMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -44,7 +45,7 @@ public class JwtService {
                     .verify(token)
                     .getSubject();
         } catch (JWTVerificationException e) {
-            throw new ExceptionMessage(HttpStatus.UNAUTHORIZED, "error with validation token");
+            throw new BadCredentialsException("error with validation token");
         }
     }
 
