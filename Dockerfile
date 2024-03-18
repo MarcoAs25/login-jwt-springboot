@@ -1,11 +1,9 @@
-FROM maven:3-openjdk-17 AS build
+FROM maven:3.9.5 AS build
 
-COPY src /home/app/src
-COPY pom.xml /home/app
-RUN mvn -f /home/app/pom.xml clean package
+RUN mvn install clean install
 
 
 FROM openjdk:17
-COPY --from=build /home/app/target/docker-spring-boot.jar /usr/local/lib/app.jar
+COPY --from=build /target/docker-spring-boot.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","/usr/local/lib/app.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]
